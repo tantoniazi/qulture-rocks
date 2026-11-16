@@ -1,0 +1,39 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker
+*.pid
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Backend (Rails)
+backend/log/*
+backend/tmp/*
+backend/storage/*
+backend/coverage/
+backend/public/assets/
+backend/config/master.key
+backend/config/credentials/*.key
+!backend/log/.keep
+!backend/tmp/.keep
+!backend/storage/.keep
+
+# Frontend (Node)
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# End-to-end (Playwright)
+e2e/node_modules/
+e2e/playwright-report/
+e2e/test-results/
+e2e/node_modules/
+
+# Playwright browsers cache
+.ms-playwright/

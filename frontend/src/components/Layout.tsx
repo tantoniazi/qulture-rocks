@@ -1,0 +1,32 @@
+import type { ReactNode } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/useAuth";
+
+export function Layout({ children }: { children: ReactNode }) {
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate("/login", { replace: true });
+  }
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <Link to="/" className="brand">
+          Qulture Organogram
+        </Link>
+        {session && (
+          <div className="user-area">
+            <span>{session.user.name}</span>
+            <button type="button" className="button button-ghost" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        )}
+      </header>
+      <main className="app-main">{children}</main>
+    </div>
+  );
+}
