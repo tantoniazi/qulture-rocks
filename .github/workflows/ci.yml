@@ -43,8 +43,11 @@ jobs:
         if: failure()
         run: docker compose logs --no-color
 
+      # Only needed to debug a failure. Upload problems (for example, a full artifact quota)
+      # must not turn a green test run red.
       - name: Upload Playwright report and traces
-        if: always()
+        if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
