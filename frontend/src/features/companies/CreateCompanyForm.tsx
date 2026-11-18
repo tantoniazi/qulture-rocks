@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@apollo/client/react";
-import { COMPANIES_QUERY, CREATE_COMPANY_MUTATION } from "../../graphql/documents";
+import { CREATE_COMPANY_MUTATION } from "../../graphql/documents";
 import { ErrorList } from "../../components/ErrorList";
 import { FormField } from "../../components/FormField";
 
@@ -8,23 +8,12 @@ interface CreateCompanyResult {
   createCompany: { company: { id: string; name: string } | null; errors: string[] };
 }
 
-interface CompaniesData {
-  companies: { id: string; name: string; employees: { id: string }[] }[];
-}
-
 export function CreateCompanyForm() {
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [createCompany, { loading }] = useMutation<CreateCompanyResult>(CREATE_COMPANY_MUTATION, {
-    // Write the new company into the cached list directly, so the screen updates
-    // even when a list request is already in flight and would deduplicate a refetch.
-    update(cache, { data }) {
-      const company = data?.createCompany.company;
-      if (!company) return;
-      cache.updateQuery<CompaniesData>({ query: COMPANIES_QUERY }, (existing) =>
-        existing && { companies: [...existing.companies, { ...company, employees: [] }] },
-      );
-    },
+    refetchQueries: ["Companies"],
+    awaitRefetchQueries: true,
   });
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

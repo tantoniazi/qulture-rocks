@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { newUser } from "../../support/data";
+import { waitForEmail } from "../../support/mail";
 import { signInThroughUi, signOutThroughUi, signUpThroughUi } from "../../support/ui";
 
 test.describe("Authentication", () => {
@@ -15,6 +16,14 @@ test.describe("Authentication", () => {
 
     await expect(page).toHaveURL("/");
     await expect(page.getByText(user.name)).toBeVisible();
+  });
+
+  test("signing up sends a welcome email", async ({ page }) => {
+    const user = newUser();
+    await signUpThroughUi(page, user);
+
+    const body = await waitForEmail(user.email, "Welcome to Qulture Organogram");
+    expect(body).toContain(`Hi ${user.name}`);
   });
 
   test("passwords that do not match are rejected before any request", async ({ page }) => {

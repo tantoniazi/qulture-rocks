@@ -29,6 +29,18 @@ export async function signup(input: SignupInput): Promise<Session> {
   return { token: data.token, user: data.user };
 }
 
+// Always resolves for a well-formed request: the server never reveals whether the email is registered.
+export async function requestPasswordReset(email: string): Promise<void> {
+  await apiRequest<unknown>("/auth/password", { method: "POST", body: { user: { email } } });
+}
+
+export async function resetPassword(token: string, password: string, passwordConfirmation: string): Promise<void> {
+  await apiRequest<unknown>("/auth/password", {
+    method: "PUT",
+    body: { user: { token, password, password_confirmation: passwordConfirmation } },
+  });
+}
+
 export async function logout(token: string): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "DELETE", token });
 }

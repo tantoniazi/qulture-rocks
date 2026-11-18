@@ -27,6 +27,15 @@ async function authenticatedSession(request: APIRequestContext) {
   return session.token;
 }
 
+async function totalCompanies(request: APIRequestContext, token: string): Promise<number> {
+  const result = await graphql<{ companies: { totalCount: number } }>(
+    request,
+    "{ companies(perPage: 1) { totalCount } }",
+    token,
+  );
+  return result.data?.companies.totalCount ?? Number.NaN;
+}
+
 async function createCompany(request: APIRequestContext, token: string, name: string): Promise<CompanyRef> {
   const result = await graphql<CreateCompanyData>(
     request,
@@ -51,17 +60,18 @@ async function createEmployee(request: APIRequestContext, token: string, company
 
 test.describe("GraphQL API integration", () => {
   test("requests without a token are rejected", async ({ request }) => {
-    const result = await graphql(request, "{ companies { id } }");
+    const result = await graphql(request, "{ companies { nodes { id } } }");
     expect(result.status).toBe(401);
   });
 
-  test("companies can be created and listed", async ({ request }) => {
+  test("creating a company increases the paginated total", async ({ request }) => {
     const token = await authenticatedSession(request);
-    const name = newCompanyName();
-    const created = await createCompany(request, token, name);
+    const before = await totalCompanies(request, token);
 
-    const listed = await graphql<{ companies: CompanyRef[] }>(request, "{ companies { id name } }", token);
-    expect(listed.data?.companies.map((company) => company.id)).toContain(created.id);
+    await createCompany(request, token, newCompanyName());
+
+    // Other E2E projects create companies in parallel, so the total can grow by more than one.
+    expect(await totalCompanies(request, token)).toBeGreaterThan(before);
   });
 
   test("a company name is unique regardless of case", async ({ request }) => {

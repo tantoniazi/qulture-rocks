@@ -16,9 +16,9 @@ RSpec.describe "GraphQL API", type: :request do
       create(:company, name: "Zeta")
       create(:company, name: "Alpha")
 
-      data = graphql("{ companies { name } }", headers: headers)
+      data = graphql("{ companies { nodes { name } } }", headers: headers)
 
-      expect(data.dig("data", "companies").map { |c| c["name"] }).to eq(%w[Alpha Zeta])
+      expect(data.dig("data", "companies", "nodes").map { |c| c["name"] }).to eq(%w[Alpha Zeta])
     end
 
     it "creates a company" do

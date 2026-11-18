@@ -1,8 +1,10 @@
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Avatar } from "../../components/Avatar";
 import { ErrorList } from "../../components/ErrorList";
+import { Pagination } from "../../components/Pagination";
 import { COMPANY_QUERY, DELETE_EMPLOYEE_MUTATION } from "../../graphql/documents";
+import { PAGE_SIZE, parsePage } from "../../lib/pagination";
 import { AddEmployeeForm } from "../employees/AddEmployeeForm";
 import { OrgChart } from "../organogram/OrgChart";
 import type { OrgEmployee } from "../organogram/buildOrgTree";
@@ -11,8 +13,25 @@ interface CompanyEmployee extends OrgEmployee {
   email: string;
 }
 
+interface ListedEmployee {
+  id: string;
+  name: string;
+  email: string;
+  picture: string | null;
+}
+
 interface CompanyData {
-  company: { id: string; name: string; employees: CompanyEmployee[] } | null;
+  company: {
+    id: string;
+    name: string;
+    employees: CompanyEmployee[];
+    employeePage: {
+      nodes: ListedEmployee[];
+      totalCount: number;
+      page: number;
+      totalPages: number;
+    };
+  } | null;
 }
 
 interface DeleteEmployeeResult {
@@ -21,7 +40,11 @@ interface DeleteEmployeeResult {
 
 export function CompanyPage() {
   const { companyId = "" } = useParams();
-  const { data, loading, error } = useQuery<CompanyData>(COMPANY_QUERY, { variables: { id: companyId } });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const employeesPage = parsePage(searchParams.get("employeesPage"));
+  const { data, loading, error } = useQuery<CompanyData>(COMPANY_QUERY, {
+    variables: { id: companyId, employeesPage, perPage: PAGE_SIZE },
+  });
   const [deleteEmployee, deleteState] = useMutation<DeleteEmployeeResult>(DELETE_EMPLOYEE_MUTATION, {
     refetchQueries: ["Company"],
     awaitRefetchQueries: true,
@@ -32,9 +55,10 @@ export function CompanyPage() {
   if (!data?.company) return <p className="empty-state">Company not found.</p>;
 
   const { company } = data;
+  const listed = company.employeePage;
 
-  async function handleDelete(employee: CompanyEmployee) {
-    if (!window.confirm(`Remove ${employee.name} from ${company?.name}?`)) return;
+  async function handleDelete(employee: ListedEmployee) {
+    if (!window.confirm(`Remove ${employee.name} from ${company.name}?`)) return;
     await deleteEmployee({ variables: { employeeId: employee.id } });
   }
 
@@ -52,9 +76,9 @@ export function CompanyPage() {
       <section className="card">
         <h2>Employees</h2>
         <ErrorList errors={deleteState.data?.deleteEmployee.errors ?? []} />
-        {company.employees.length === 0 && <p className="empty-state">No employees yet.</p>}
+        {listed.totalCount === 0 && <p className="empty-state">No employees yet.</p>}
         <ul className="employee-list">
-          {company.employees.map((employee) => (
+          {listed.nodes.map((employee) => (
             <li key={employee.id} className="employee-row">
               <Avatar name={employee.name} picture={employee.picture} />
               <Link to={`/companies/${company.id}/employees/${employee.id}`}>{employee.name}</Link>
@@ -65,6 +89,11 @@ export function CompanyPage() {
             </li>
           ))}
         </ul>
+        <Pagination
+          page={listed.page}
+          totalPages={listed.totalPages}
+          onPageChange={(next) => setSearchParams({ employeesPage: String(next) })}
+        />
       </section>
     </div>
   );

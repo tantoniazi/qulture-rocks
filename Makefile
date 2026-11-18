@@ -81,7 +81,7 @@ lint-frontend: ## Lint and type-check the frontend
 # --- Everything -----------------------------------------------------------
 
 test-e2e: ## Start the stack, wait until healthy, then run Playwright E2E and API integration tests
-	$(COMPOSE) up -d --wait backend frontend
+	$(COMPOSE) up -d --wait backend sidekiq frontend mailhog
 	$(COMPOSE) --profile e2e run --rm e2e
 
 test: test-backend test-frontend ## Run all unit and integration suites

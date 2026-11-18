@@ -24,7 +24,12 @@ make up        # start database, API and frontend
 | Frontend  | http://localhost:5173         |
 | API       | http://localhost:3000         |
 | GraphQL   | `POST http://localhost:3000/graphql` |
+| GraphiQL (GraphQL playground, development only) | http://localhost:3000/graphiql |
 | Swagger   | http://localhost:3000/api-docs |
+| Sidekiq dashboard (basic auth, see Configuration) | http://localhost:3000/sidekiq |
+| MailHog (captured emails) | http://localhost:8025         |
+
+The frontend header links to Swagger, GraphiQL and the Sidekiq dashboard.
 
 ## Make targets
 
@@ -57,7 +62,7 @@ qulture-rocks/
 ├── e2e/                Playwright: browser (ui/) and API integration (api/) tests
 ├── docs/sdd/           Spec-driven development: epics, user stories, Gherkin criteria
 ├── agents/             Agent definitions used to work on this repository
-├── docker-compose.yml  db, backend and frontend services
+├── docker-compose.yml  db, redis, backend, sidekiq, mailhog, frontend and e2e services
 └── Makefile            Single entry point for every workflow
 ```
 
@@ -86,13 +91,24 @@ Key decisions:
 | `POST` | `/auth/signup` | Create an account; returns `token` and `user` |
 | `POST` | `/auth/login` | Sign in; returns `token` and `user` |
 | `DELETE` | `/auth/logout` | Revoke the bearer token |
+| `POST` | `/auth/password` | Email reset instructions; always answers `202` so no account is revealed |
+| `PUT` | `/auth/password` | Set a new password with the token from the email |
 
 Send the token as `Authorization: Bearer <token>`.
 
+Sign-up sends a welcome email, and password reset sends its instructions by email. Both
+emails are queued in Redis and delivered by the `sidekiq` service through SMTP; locally they
+land in MailHog.
+
 ### Domain (GraphQL)
 
-Query `companies`, `company(id)`, `employee(id)`. Each `Employee` exposes `manager`,
+Query `companies(page, perPage)`, `company(id)`, `employee(id)`. Each `Employee` exposes `manager`,
 `directReports`, `peers` and `secondLevelReports`.
+
+Lists are paginated with `page` (starts at 1) and `perPage` (default 10, maximum 50). A page
+returns `nodes`, `totalCount`, `page`, `perPage` and `totalPages`. Companies are paged with
+`companies(page, perPage)`, and a company's employee list with `company.employeePage(page, perPage)`.
+`company.employees` returns every employee and is used to draw the organogram.
 
 Mutations: `createCompany`, `createEmployee`, `deleteEmployee`, `assignManager`.
 Mutations return an `errors` list with business rule violations; an empty list means success.
@@ -114,8 +130,9 @@ mutation {
 - **Frontend:** Vitest with Testing Library covering validation, forms, auth screens and the
   organogram rendering logic.
 - **End-to-end:** Playwright in `e2e/`, running in Docker against the real stack: browser tests (`e2e/tests/ui`)
-  for authentication, companies and the organogram, and HTTP integration tests (`e2e/tests/api`) for the
-  REST and GraphQL contracts. Run `make test-e2e`; it starts the stack and waits until it is healthy.
+  for authentication, password recovery (reading the reset link from MailHog), companies, pagination and the
+  organogram, and HTTP integration tests (`e2e/tests/api`) for the REST and GraphQL contracts. Run `make test-e2e`;
+  it starts the stack, including Redis, Sidekiq and MailHog, and waits until it is healthy.
   Tests create their own users and companies, so they can be repeated against the same database.
 
 Run `make test` for the unit and component suites. Specifications and the acceptance criteria they verify
@@ -131,9 +148,18 @@ Defaults work out of the box with Docker Compose. Optional environment variables
 | `FRONTEND_URL` | `http://localhost:5173` | CORS allowed origin |
 | `VITE_API_URL` | `http://localhost:3000` | Frontend base URL for the API |
 | `DATABASE_URL` | set by Compose | PostgreSQL connection |
+| `FRONTEND_PUBLIC_URL` | `http://localhost:5173` | Base of the reset-password link in emails |
+| `REDIS_URL` | `redis://redis:6379/0` | Sidekiq queue |
+| `SMTP_ADDRESS` / `SMTP_PORT` | `mailhog` / `1025` (development) | Where emails are sent |
+| `SMTP_ADDRESS` (required) / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | none / `587` (production) | Production SMTP relay |
+| `SIDEKIQ_USERNAME` / `SIDEKIQ_PASSWORD` | unset (dashboard closed) | Basic auth for `/sidekiq`; Compose sets `admin` / `admin` for local development only |
+
+The GraphiQL playground is mounted only in the development environment. Production must set
+the SMTP and Sidekiq variables; the application fails to boot in production without `SMTP_ADDRESS`.
 
 ## Known limitations
 
 - Companies are shared by every signed-in user; there is no per-company authorization.
 - Pictures are stored as URLs; there is no upload.
-- The GraphQL endpoint does not paginate lists yet.
+- The organogram loads every employee of a company (it is not paginated), because the tree needs all of them.
+- The companies list is sorted by name; a newly created company appears on its page, not necessarily the first.

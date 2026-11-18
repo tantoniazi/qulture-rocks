@@ -72,6 +72,47 @@ components:
               type: string
             email:
               type: string
+    PasswordRequest:
+      type: object
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          required:
+          - email
+          properties:
+            email:
+              type: string
+              format: email
+              example: ana@example.com
+    PasswordResetRequest:
+      type: object
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          required:
+          - token
+          - password
+          - password_confirmation
+          properties:
+            token:
+              type: string
+              description: Token from the reset link in the email
+            password:
+              type: string
+              minLength: 8
+              example: newpassword1
+            password_confirmation:
+              type: string
+              example: newpassword1
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
     ErrorResponse:
       type: object
       properties:
@@ -140,3 +181,45 @@ paths:
           description: signed out
         '401':
           description: missing or invalid token
+  "/auth/password":
+    post:
+      summary: Sends password reset instructions to a registered email
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '202':
+          description: instructions accepted (the same for registered and unknown
+            emails)
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PasswordRequest"
+    put:
+      summary: Sets a new password using the token from the reset email
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '200':
+          description: password updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageResponse"
+        '422':
+          description: token invalid or passwords do not match
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorResponse"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PasswordResetRequest"

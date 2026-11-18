@@ -8,6 +8,7 @@ module Auth
       user = User.new(@attributes)
       return failure(user.errors.full_messages) unless user.save
 
+      UserMailer.welcome(user).deliver_later
       success(record: user, token: IssueToken.call(user))
     end
   end

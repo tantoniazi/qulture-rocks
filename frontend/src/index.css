@@ -357,6 +357,24 @@ select {
   border-color: var(--color-primary);
 }
 
+.tool-links {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.tool-links a {
+  color: var(--color-text);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 600px) {
   .app-header {
     flex-direction: column;

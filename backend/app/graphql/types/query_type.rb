@@ -1,6 +1,9 @@
 module Types
   class QueryType < BaseObject
-    field :companies, [ "Types::CompanyType" ], null: false, description: "All companies, ordered by name"
+    field :companies, "Types::CompanyPageType", null: false, description: "A page of companies, ordered by name" do
+      argument :page, Integer, required: false, default_value: 1
+      argument :per_page, Integer, required: false, default_value: Pagination::Paginate::DEFAULT_PER_PAGE
+    end
     field :company, "Types::CompanyType", null: true, description: "Find a company by id" do
       argument :id, ID, required: true
     end
@@ -8,8 +11,8 @@ module Types
       argument :id, ID, required: true
     end
 
-    def companies
-      Company.order(:name)
+    def companies(page:, per_page:)
+      Pagination::Paginate.call(relation: Company.order(:name), page: page, per_page: per_page)
     end
 
     def company(id:)

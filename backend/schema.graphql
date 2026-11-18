@@ -14,9 +14,29 @@ type AssignManagerPayload {
 A company whose organisation chart is managed by the system
 """
 type Company {
+  """
+  A page of employees, ordered by name
+  """
+  employeePage(page: Int = 1, perPage: Int = 10): EmployeePage!
+
+  """
+  Every employee, used to draw the organogram
+  """
   employees: [Employee!]!
+  employeesCount: Int!
   id: ID!
   name: String!
+}
+
+"""
+One page of companies
+"""
+type CompanyPage {
+  nodes: [Company!]!
+  page: Int!
+  perPage: Int!
+  totalCount: Int!
+  totalPages: Int!
 }
 
 """
@@ -81,6 +101,17 @@ type Employee {
   secondLevelReports: [Employee!]!
 }
 
+"""
+One page of employees
+"""
+type EmployeePage {
+  nodes: [Employee!]!
+  page: Int!
+  perPage: Int!
+  totalCount: Int!
+  totalPages: Int!
+}
+
 type Mutation {
   """
   Sets the manager of an employee; pass a null managerId to remove the manager
@@ -105,9 +136,9 @@ type Mutation {
 
 type Query {
   """
-  All companies, ordered by name
+  A page of companies, ordered by name
   """
-  companies: [Company!]!
+  companies(page: Int = 1, perPage: Int = 10): CompanyPage!
 
   """
   Find a company by id

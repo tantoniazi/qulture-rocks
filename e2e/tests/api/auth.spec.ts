@@ -51,13 +51,13 @@ test.describe("Authentication endpoints", () => {
 
   test("sign out revokes the token for the GraphQL endpoint", async ({ request }) => {
     const session = await signUp(request, newUser());
-    const before = await graphql(request, "{ companies { id } }", session.token);
+    const before = await graphql(request, "{ companies { nodes { id } } }", session.token);
     expect(before.status).toBe(200);
 
     const logout = await signOut(request, session.token);
     expect(logout.status()).toBe(204);
 
-    const after = await graphql(request, "{ companies { id } }", session.token);
+    const after = await graphql(request, "{ companies { nodes { id } } }", session.token);
     expect(after.status).toBe(401);
   });
 });

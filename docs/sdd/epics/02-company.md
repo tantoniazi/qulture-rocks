@@ -45,9 +45,14 @@ Feature: List companies
     Given companies "Zeta" and "Alpha" exist
     When I query the companies
     Then I receive "Alpha" followed by "Zeta"
+
+  Scenario: Paginating companies
+    Given there are 11 companies
+    When I query the first page of 10 companies
+    Then I receive 10 companies, a total count of 11 and 2 total pages
 ```
 
-Covered by: `spec/requests/graphql_spec.rb`.
+Covered by: `spec/requests/graphql_spec.rb`, `spec/requests/graphql_pagination_spec.rb`, `spec/services/pagination/paginate_spec.rb`, `e2e/tests/ui/companies.spec.ts` (paginated list).
 
 ## US-1.3 — View a company
 

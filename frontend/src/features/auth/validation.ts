@@ -11,7 +11,16 @@ export function validateSignup(input: SignupInput): string[] {
   const errors: string[] = [];
   if (!input.name.trim()) errors.push("Name is required");
   if (!/^[^@\s]+@[^@\s]+$/.test(input.email.trim())) errors.push("Enter a valid email");
-  if (input.password.length < 8) errors.push("Password must have at least 8 characters");
-  if (input.password !== input.passwordConfirmation) errors.push("Passwords do not match");
+  return [...errors, ...validateNewPassword(input.password, input.passwordConfirmation)];
+}
+
+export function validateForgotPassword(email: string): string[] {
+  return email.trim() ? [] : ["Email is required"];
+}
+
+export function validateNewPassword(password: string, passwordConfirmation: string): string[] {
+  const errors: string[] = [];
+  if (password.length < 8) errors.push("Password must have at least 8 characters");
+  if (password !== passwordConfirmation) errors.push("Passwords do not match");
   return errors;
 }
