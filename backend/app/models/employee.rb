@@ -12,6 +12,6 @@ class Employee < ApplicationRecord
             format: { with: URI::MailTo::EMAIL_REGEXP },
             uniqueness: { scope: :company_id, case_sensitive: false }
   validates :picture,
-            format: { with: %r{\Ahttps?://\S+\z}, message: "must be a valid http(s) URL" },
+            format: { with: %r{\Ahttps?://\S+\z}, message: :http_url },
             allow_blank: true
 end

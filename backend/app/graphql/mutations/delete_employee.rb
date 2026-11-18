@@ -8,7 +8,7 @@ module Mutations
 
     def resolve(employee_id:)
       employee = Employee.find_by(id: employee_id)
-      return { success: false, errors: [ "Employee not found" ] } unless employee
+      return { success: false, errors: [ I18n.t("business_errors.employee.not_found") ] } unless employee
 
       result = Employees::Destroy.call(employee: employee)
       { success: result.success?, errors: result.errors }

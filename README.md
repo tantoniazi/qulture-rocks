@@ -157,6 +157,14 @@ Defaults work out of the box with Docker Compose. Optional environment variables
 The GraphiQL playground is mounted only in the development environment. Production must set
 the SMTP and Sidekiq variables; the application fails to boot in production without `SMTP_ADDRESS`.
 
+### Error messages and languages
+
+Error messages are written in English in the code (`config/locales/en.yml`, and `translate` keys in
+`frontend/src/lib/i18n.ts`) and translated to Brazilian Portuguese in `config/locales/pt-BR.yml`,
+`config/locales/devise.pt-BR.yml` and the frontend `i18n.ts`. The API answers in the language of the
+first `Accept-Language` tag: `pt-BR` or `pt` gets Portuguese, anything else gets English. The frontend
+sends the browser language on every request. Emails and screen labels are still English.
+
 ## Known limitations
 
 - Companies are shared by every signed-in user; there is no per-company authorization.

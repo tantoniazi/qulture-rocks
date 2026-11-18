@@ -43,3 +43,20 @@ describe("validateSignup", () => {
     ]);
   });
 });
+
+describe("validation messages in Portuguese", () => {
+  beforeEach(() => {
+    Object.defineProperty(window.navigator, "language", { value: "pt-BR", configurable: true });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window.navigator, "language");
+  });
+
+  it("translates the password rules", () => {
+    expect(validateNewPassword("short", "other")).toEqual([
+      "A senha precisa ter pelo menos 8 caracteres",
+      "As senhas não coincidem",
+    ]);
+  });
+});

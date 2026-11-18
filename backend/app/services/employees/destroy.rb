@@ -5,7 +5,7 @@ module Employees
     end
 
     def call
-      return failure([ "Employee could not be deleted" ]) unless @employee.destroy
+      return failure([ I18n.t("business_errors.employee.delete_failed") ]) unless @employee.destroy
 
       success(record: @employee)
     end

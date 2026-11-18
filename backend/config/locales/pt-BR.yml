@@ -1,0 +1,43 @@
+pt-BR:
+  business_errors:
+    auth:
+      invalid_credentials: "E-mail ou senha inválidos"
+      missing_token: "Token ausente"
+      invalid_token: "Token inválido"
+    company:
+      not_found: "Empresa não encontrada"
+    employee:
+      not_found: "Funcionário não encontrado"
+      manager_not_found: "Gestor não encontrado"
+      delete_failed: "Não foi possível remover o funcionário"
+      manager_from_other_company: "O gestor precisa pertencer à mesma empresa"
+      own_manager: "Um funcionário não pode ser o próprio gestor"
+      hierarchy_loop: "A atribuição criaria um ciclo na hierarquia"
+  activerecord:
+    attributes:
+      user:
+        name: "Nome"
+        email: "E-mail"
+        password: "Senha"
+        password_confirmation: "Confirmação de senha"
+        reset_password_token: "Token de redefinição de senha"
+      company:
+        name: "Nome"
+      employee:
+        name: "Nome"
+        email: "E-mail"
+        picture: "Foto"
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "não pode ficar em branco"
+      taken: "já está em uso"
+      invalid: "é inválido"
+      confirmation: "não corresponde a %{attribute}"
+      http_url: "precisa ser uma URL http(s) válida"
+      too_long:
+        one: "precisa ter no máximo 1 caractere"
+        other: "precisa ter no máximo %{count} caracteres"
+      too_short:
+        one: "precisa ter no mínimo 1 caractere"
+        other: "precisa ter no mínimo %{count} caracteres"

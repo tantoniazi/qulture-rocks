@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { FormField } from "../../components/FormField";
 import { ApiError } from "../../lib/api";
+import { translate } from "../../lib/i18n";
 import { AuthForm } from "./AuthForm";
 import { requestPasswordReset } from "./authService";
 import { validateForgotPassword } from "./validation";
@@ -23,7 +24,7 @@ export function ForgotPasswordPage() {
       await requestPasswordReset(email.trim());
       setSent(true);
     } catch (error) {
-      setErrors(error instanceof ApiError ? error.errors : ["Could not reach the server"]);
+      setErrors(error instanceof ApiError ? error.errors : [translate("api.could_not_reach_server")]);
     } finally {
       setSubmitting(false);
     }
