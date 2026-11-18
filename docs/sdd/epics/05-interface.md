@@ -32,6 +32,8 @@ Feature: Companies screen
     Then it appears in the list without reloading the page
 ```
 
+Covered by: `e2e/tests/ui/companies.spec.ts` (a new company appears in the list).
+
 ## UI-3 — Organogram view
 
 *The company screen draws the hierarchy from the employees and their managers, like the challenge's reference chart.*
@@ -50,7 +52,7 @@ Feature: Organogram
     Then I see a message inviting me to add the first employee
 ```
 
-Covered by: `frontend/src/features/organogram/*.test.ts(x)`.
+Covered by: `frontend/src/features/organogram/*.test.ts(x)` (rendering) and `e2e/tests/ui/companies.spec.ts` (empty company).
 
 ## UI-4 — Employee screen
 
@@ -62,3 +64,5 @@ Feature: Employee screen
     Then I see their manager, direct reports, peers and second-level reports
     And I can change their manager from a list of employees of the same company
 ```
+
+Covered by: `e2e/tests/ui/organogram.spec.ts` (manager, direct reports, peers, second-level reports and manager change).

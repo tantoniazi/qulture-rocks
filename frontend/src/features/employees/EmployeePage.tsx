@@ -27,7 +27,11 @@ interface EmployeeData {
 
 export function EmployeePage() {
   const { companyId = "", employeeId = "" } = useParams();
-  const { data, loading, error } = useQuery<EmployeeData>(EMPLOYEE_QUERY, { variables: { id: employeeId } });
+  // Peers and second-level reports depend on other employees' managers, which the cache cannot update on its own.
+  const { data, loading, error } = useQuery<EmployeeData>(EMPLOYEE_QUERY, {
+    variables: { id: employeeId },
+    fetchPolicy: "cache-and-network",
+  });
 
   if (loading) return <p>Loading employee...</p>;
   if (error) return <ErrorList errors={[error.message]} />;
