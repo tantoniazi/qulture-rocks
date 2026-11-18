@@ -84,6 +84,6 @@ export function employeeLink(page: Page, name: string): Locator {
   return employeesCard(page).getByRole("link", { name });
 }
 
-function isOperation(body: string | null, operationName: string): boolean {
+export function isOperation(body: string | null, operationName: string): boolean {
   return (body ?? "").includes(`"operationName":"${operationName}"`);
 }
