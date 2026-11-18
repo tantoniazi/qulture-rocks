@@ -33,8 +33,12 @@ interface RegistrationInput {
   password: string;
 }
 
+// Absolute URLs: the `request` fixture resolves relative paths against the project's baseURL,
+// which is the frontend in the ui project, so the API must be addressed explicitly.
+const API_URL = process.env.E2E_API_URL ?? "http://localhost:3000";
+
 export async function signUp(request: APIRequestContext, input: RegistrationInput): Promise<Session> {
-  const response = await request.post("/auth/signup", {
+  const response = await request.post(`${API_URL}/auth/signup`, {
     data: { user: { ...input, password_confirmation: input.password } },
   });
   if (response.status() !== 201) {
@@ -44,11 +48,11 @@ export async function signUp(request: APIRequestContext, input: RegistrationInpu
 }
 
 export async function signIn(request: APIRequestContext, email: string, password: string) {
-  return request.post("/auth/login", { data: { user: { email, password } } });
+  return request.post(`${API_URL}/auth/login`, { data: { user: { email, password } } });
 }
 
 export async function signOut(request: APIRequestContext, token: string) {
-  return request.delete("/auth/logout", { headers: { Authorization: `Bearer ${token}` } });
+  return request.delete(`${API_URL}/auth/logout`, { headers: { Authorization: `Bearer ${token}` } });
 }
 
 // Runs a GraphQL operation. The status is returned so tests can assert 401 without throwing.
@@ -57,7 +61,7 @@ export async function graphql<T>(
   query: string,
   token?: string,
 ): Promise<GraphqlResult<T>> {
-  const response = await request.post("/graphql", {
+  const response = await request.post(`${API_URL}/graphql`, {
     data: { query },
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });

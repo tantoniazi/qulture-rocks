@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { newCompanyName, newUser } from "../../support/data";
 import { graphql } from "../../support/api";
-import { createCompanyThroughUi, goToCompanyInList, openCompany, signUpThroughUi } from "../../support/ui";
+import { createCompanyThroughUi, goToCompanyInList, isOperation, openCompany, signUpThroughUi } from "../../support/ui";
 
 test.describe("Companies", () => {
   test.beforeEach(async ({ page }) => {
@@ -19,11 +19,23 @@ test.describe("Companies", () => {
   test("the company list is paginated", async ({ page, request }) => {
     const token: string = await page.evaluate(() => JSON.parse(window.localStorage.getItem("qulture.session") ?? "null").token);
     for (let index = 0; index < 11; index += 1) {
-      await graphql(request, `mutation { createCompany(name: "${newCompanyName()}") { company { id } errors } }`, token);
+      const created = await graphql<{ createCompany: { company: { id: string } | null; errors: string[] } }>(
+        request,
+        `mutation { createCompany(name: "${newCompanyName()}") { company { id } errors } }`,
+        token,
+      );
+      // graphql() does not throw on failures, so check the outcome of every creation explicitly.
+      expect(created.status, "createCompany request").toBe(200);
+      expect(created.data?.createCompany.errors, "createCompany errors").toEqual([]);
     }
 
+    const total = await graphql<{ companies: { totalCount: number } }>(request, "{ companies(perPage: 1) { totalCount } }", token);
+    expect(total.data?.companies.totalCount, "companies on the server").toBeGreaterThanOrEqual(11);
+
+    const listLoaded = page.waitForResponse((response) => isOperation(response.request().postData(), "Companies"));
     await page.goto("/");
-    await expect(page.getByText(/^Page 1 of \d+$/)).toBeVisible();
+    await listLoaded;
+    await expect(page.getByText(/^Page 1 of \d+$/)).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Next" }).click();
 
     await expect(page).toHaveURL(/\?page=2$/);
