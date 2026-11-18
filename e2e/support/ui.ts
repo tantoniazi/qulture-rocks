@@ -35,10 +35,29 @@ export async function createCompanyThroughUi(page: Page, name: string) {
   await listLoaded;
   await page.getByLabel("Company name").fill(name);
   await page.getByRole("button", { name: "Create company" }).click();
-  await expect(page.getByRole("link", { name })).toBeVisible();
+  // The form clears only after the server accepted the company.
+  await expect(page.getByLabel("Company name")).toHaveValue("");
+}
+
+// The list is sorted by name and paginated, so a company may sit on any page.
+export async function goToCompanyInList(page: Page, name: string) {
+  const link = page.getByRole("link", { name });
+  const next = page.getByRole("button", { name: "Next" });
+  await expect(page.locator("a.company-card").first()).toBeVisible();
+
+  for (let current = 1; (await link.count()) === 0; current += 1) {
+    await expect(next, `${name} is not on any page of the company list`).toBeEnabled();
+    await Promise.all([
+      page.waitForResponse((response) => isOperation(response.request().postData(), "Companies")),
+      next.click(),
+    ]);
+    await expect(page.getByText(new RegExp(`^Page ${current + 1} of \\d+$`))).toBeVisible();
+  }
+  await expect(link).toBeVisible();
 }
 
 export async function openCompany(page: Page, name: string) {
+  await goToCompanyInList(page, name);
   await page.getByRole("link", { name }).click();
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
 }
@@ -62,7 +81,7 @@ export function employeesCard(page: Page): Locator {
 }
 
 export function employeeLink(page: Page, name: string): Locator {
-  return employeesCard(page).getByRole("link", { name, exact: true });
+  return employeesCard(page).getByRole("link", { name });
 }
 
 function isOperation(body: string | null, operationName: string): boolean {

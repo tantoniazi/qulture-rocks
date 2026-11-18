@@ -10,6 +10,7 @@ Devise.setup do |config|
   config.password_length = 8..128
   config.email_regexp = /\A[^@\s]+@[^@\s]+\z/
   config.sign_out_via = :delete
+  config.mailer_sender = "no-reply@qulture.local"
   config.navigational_formats = []
 
   config.jwt do |jwt|

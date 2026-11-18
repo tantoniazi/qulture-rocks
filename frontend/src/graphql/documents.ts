@@ -1,19 +1,22 @@
 import { gql } from "@apollo/client";
 
 export const COMPANIES_QUERY = gql`
-  query Companies {
-    companies {
-      id
-      name
-      employees {
+  query Companies($page: Int!, $perPage: Int!) {
+    companies(page: $page, perPage: $perPage) {
+      nodes {
         id
+        name
+        employeesCount
       }
+      totalCount
+      page
+      totalPages
     }
   }
 `;
 
 export const COMPANY_QUERY = gql`
-  query Company($id: ID!) {
+  query Company($id: ID!, $employeesPage: Int!, $perPage: Int!) {
     company(id: $id) {
       id
       name
@@ -25,6 +28,17 @@ export const COMPANY_QUERY = gql`
         manager {
           id
         }
+      }
+      employeePage(page: $employeesPage, perPage: $perPage) {
+        nodes {
+          id
+          name
+          email
+          picture
+        }
+        totalCount
+        page
+        totalPages
       }
     }
   }

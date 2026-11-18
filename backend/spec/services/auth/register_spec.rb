@@ -19,4 +19,12 @@ RSpec.describe Auth::Register do
     expect(result).not_to be_success
     expect(result.errors).to be_present
   end
+
+  it "queues a welcome email for the new user" do
+    expect { described_class.call(attributes: attributes) }.to have_enqueued_mail(UserMailer, :welcome)
+  end
+
+  it "does not queue a welcome email when the user is invalid" do
+    expect { described_class.call(attributes: attributes.merge("name" => "")) }.not_to have_enqueued_mail
+  end
 end

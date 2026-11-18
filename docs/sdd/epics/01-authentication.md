@@ -92,3 +92,46 @@ Feature: Protected GraphQL endpoint
 ```
 
 Covered by: `spec/requests/graphql_spec.rb`.
+
+## AUTH-5 — Welcome email
+
+*As a new user, I want a welcome email after I sign up, so I know my account exists.*
+
+```gherkin
+Feature: Welcome email
+
+  Scenario: Signing up queues a welcome email
+    When I sign up with a valid name and email
+    Then a welcome email is queued for that address
+    And Sidekiq delivers it through the SMTP server (MailHog locally)
+
+  Scenario: An invalid sign-up sends nothing
+    When I sign up with an invalid name
+    Then no email is queued
+```
+
+Covered by: `spec/services/auth/register_spec.rb`, `spec/mailers/user_mailer_spec.rb`, `e2e/tests/ui/auth.spec.ts` (welcome email).
+
+## AUTH-6 — Forgot password
+
+*As a user who forgot my password, I want to reset it from a link sent by email.*
+
+```gherkin
+Feature: Password recovery
+
+  Scenario: Requesting reset instructions
+    When I submit an email on the forgot-password screen
+    Then reset instructions are queued by email for a registered address
+    And the response is the same for unknown emails, so no account is revealed
+
+  Scenario: Choosing a new password
+    Given I opened the link from the reset email
+    When I submit a matching password of at least 8 characters
+    Then I can sign in with the new password
+
+  Scenario: An invalid reset token is refused
+    When I submit a reset with an unknown token
+    Then I see "Reset password token is invalid"
+```
+
+Covered by: `spec/services/auth/request_password_reset_spec.rb`, `spec/services/auth/reset_password_spec.rb`, `spec/integration/password_spec.rb`, `e2e/tests/ui/password-reset.spec.ts`.

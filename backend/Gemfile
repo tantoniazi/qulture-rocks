@@ -15,6 +15,9 @@ gem "devise-jwt"
 # GraphQL API
 gem "graphql"
 
+# Background jobs (transactional emails) and their dashboard
+gem "sidekiq"
+
 # CORS for the React frontend
 gem "rack-cors"
 

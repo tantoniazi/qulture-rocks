@@ -22,7 +22,14 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432
       PGUSER: postgres
       HOME: /tmp
-      FRONTEND_URL: http://localhost:5173,http://frontend:5173
+      FRONTEND_URL: http://0.0.0.0:5173,http://frontend:5173
+      FRONTEND_PUBLIC_URL: http://0.0.0.0:5173
+      REDIS_URL: redis://redis:6379/0
+      SMTP_ADDRESS: mailhog
+      SMTP_PORT: 1025
+      # Local development credentials for the Sidekiq dashboard at /sidekiq.
+      SIDEKIQ_USERNAME: admin
+      SIDEKIQ_PASSWORD: admin
     volumes:
       - ./backend:/app
     ports:
@@ -30,13 +37,53 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks: [qulture]
     healthcheck:
-      test: ["CMD-SHELL", "ruby -e \"require 'uri';require 'net/http';begin;r=Net::HTTP.get_response(URI('http://localhost:3000/up'));exit(r.is_a?(Net::HTTPOK) ? 0 : 1);rescue;exit(1);end\""]
+      test: ["CMD-SHELL", "ruby -e \"require 'uri';require 'net/http';begin;r=Net::HTTP.get_response(URI('http://0.0.0.0:3000/up'));exit(r.is_a?(Net::HTTPOK) ? 0 : 1);rescue;exit(1);end\""]
       interval: 5s
       timeout: 3s
       retries: 30
       start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [qulture]
+
+  # Processes the background jobs (welcome and password reset emails).
+  sidekiq:
+    build: ./backend
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    command: bundle exec sidekiq
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432
+      PGUSER: postgres
+      HOME: /tmp
+      REDIS_URL: redis://redis:6379/0
+      SMTP_ADDRESS: mailhog
+      SMTP_PORT: 1025
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [qulture]
+
+  # Local SMTP server. Captured emails are browsable at http://localhost:8025.
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks: [qulture]
 
   frontend:
     image: node:22-alpine
@@ -45,7 +92,7 @@ services:
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     environment:
       HOME: /tmp
-      VITE_API_URL: http://localhost:3000
+      VITE_API_URL: http://0.0.0.0:3000
     volumes:
       - ./frontend:/app
     ports:
@@ -54,14 +101,14 @@ services:
       - backend
     networks: [qulture]
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"const http=require('http');http.get('http://localhost:5173/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"const http=require('http');http.get('http://0.0.0.0:5173/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
       interval: 5s
       timeout: 3s
       retries: 30
       start_period: 30s
 
   # End-to-end and API integration tests (Playwright). Run with `make test-e2e` while the stack is up.
-  # Host networking lets the browser reach the API at localhost, the same way a developer does.
+  # Host networking lets the browser reach the API at 0.0.0.0, the same way a developer does.
   e2e:
     image: mcr.microsoft.com/playwright:v1.65.1-noble
     profiles: ["e2e"]
@@ -71,8 +118,8 @@ services:
     command: sh -c "npm install --no-audit --no-fund && npx playwright test"
     environment:
       HOME: /tmp
-      E2E_BASE_URL: http://localhost:5173
-      E2E_API_URL: http://localhost:3000
+      E2E_BASE_URL: http://0.0.0.0:5173
+      E2E_API_URL: http://0.0.0.0:3000
     volumes:
       - ./e2e:/e2e
 

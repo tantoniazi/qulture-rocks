@@ -61,6 +61,40 @@ RSpec.configure do |config|
               }
             }
           },
+          PasswordRequest: {
+            type: :object,
+            required: %w[user],
+            properties: {
+              user: {
+                type: :object,
+                required: %w[email],
+                properties: {
+                  email: { type: :string, format: :email, example: "ana@example.com" }
+                }
+              }
+            }
+          },
+          PasswordResetRequest: {
+            type: :object,
+            required: %w[user],
+            properties: {
+              user: {
+                type: :object,
+                required: %w[token password password_confirmation],
+                properties: {
+                  token: { type: :string, description: "Token from the reset link in the email" },
+                  password: { type: :string, minLength: 8, example: "newpassword1" },
+                  password_confirmation: { type: :string, example: "newpassword1" }
+                }
+              }
+            }
+          },
+          MessageResponse: {
+            type: :object,
+            properties: {
+              message: { type: :string }
+            }
+          },
           ErrorResponse: {
             type: :object,
             properties: {

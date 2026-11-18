@@ -49,9 +49,14 @@ Feature: List employees
     Given "Qulture" has employees "Ana" and "Bruno"
     When I query the company's employees
     Then I receive both employees ordered by name
+
+  Scenario: Paginating a company's employees
+    Given "Qulture" has 11 employees
+    When I query the first page of its employees
+    Then I receive 10 employees and the total count of 11
 ```
 
-Covered by: `spec/requests/graphql_spec.rb`.
+Covered by: `spec/requests/graphql_pagination_spec.rb`, `spec/requests/graphql_spec.rb`.
 
 ## US-2.3 — Remove an employee
 

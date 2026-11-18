@@ -32,6 +32,8 @@ Feature: Companies screen
     Then it appears in the list without reloading the page
 ```
 
+Covered by: `e2e/tests/ui/companies.spec.ts` (a new company appears in the list).
+
 ## UI-3 — Organogram view
 
 *The company screen draws the hierarchy from the employees and their managers, like the challenge's reference chart.*
@@ -50,7 +52,7 @@ Feature: Organogram
     Then I see a message inviting me to add the first employee
 ```
 
-Covered by: `frontend/src/features/organogram/*.test.ts(x)`.
+Covered by: `frontend/src/features/organogram/*.test.ts(x)` (rendering) and `e2e/tests/ui/companies.spec.ts` (empty company).
 
 ## UI-4 — Employee screen
 
@@ -62,3 +64,54 @@ Feature: Employee screen
     Then I see their manager, direct reports, peers and second-level reports
     And I can change their manager from a list of employees of the same company
 ```
+
+Covered by: `e2e/tests/ui/organogram.spec.ts` (manager, direct reports, peers, second-level reports and manager change).
+
+## UI-5 — Developer tools in the header
+
+*As a developer, I want the API documentation and tools one click away.*
+
+```gherkin
+Feature: Developer tools
+
+  Scenario: Swagger, GraphiQL and Sidekiq are linked from the top bar
+    When I open any screen
+    Then the header links to the Swagger documentation, GraphiQL and the Sidekiq dashboard
+```
+
+Covered by: `e2e/tests/ui/companies.spec.ts` (developer tools are linked from the header).
+
+## UI-6 — Paginated lists
+
+*As a user with many companies or employees, I want to browse them page by page.*
+
+```gherkin
+Feature: Paginated lists
+
+  Scenario: Moving to the next page of companies
+    Given there are more companies than fit on one page
+    When I press "Next"
+    Then the URL shows the next page and the screen shows "Page 2 of N"
+```
+
+Covered by: `e2e/tests/ui/companies.spec.ts` (paginated list), `frontend/src/components/Pagination.test.tsx`, `frontend/src/lib/pagination.test.ts`.
+
+## UI-7 — Forgot and reset password screens
+
+*As a user who forgot my password, I want screens to request and set a new one.*
+
+```gherkin
+Feature: Password recovery screens
+
+  Scenario: Asking for reset instructions
+    Given I am on the sign-in screen
+    When I follow "Forgot your password?" and submit my email
+    Then I see "Check your email"
+
+  Scenario: Setting a new password
+    Given I opened the reset link from the email
+    When I enter a matching password of at least 8 characters
+    Then I see "Password updated"
+```
+
+Covered by: `e2e/tests/ui/password-reset.spec.ts`, `frontend/src/features/auth/validation.test.ts`.
