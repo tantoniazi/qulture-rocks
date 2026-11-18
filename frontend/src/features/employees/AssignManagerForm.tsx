@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@apollo/client/react";
-import { ASSIGN_MANAGER_MUTATION, EMPLOYEE_QUERY } from "../../graphql/documents";
+import { ASSIGN_MANAGER_MUTATION } from "../../graphql/documents";
 import { ErrorList } from "../../components/ErrorList";
 
 interface Candidate {
@@ -24,7 +24,7 @@ export function AssignManagerForm({ employeeId, currentManagerId, candidates }: 
   const [managerId, setManagerId] = useState(currentManagerId ?? NO_MANAGER);
   const [errors, setErrors] = useState<string[]>([]);
   const [assignManager, { loading }] = useMutation<AssignManagerResult>(ASSIGN_MANAGER_MUTATION, {
-    refetchQueries: [{ query: EMPLOYEE_QUERY, variables: { id: employeeId } }],
+    refetchQueries: ["Employee"],
     awaitRefetchQueries: true,
   });
 

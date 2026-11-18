@@ -9,6 +9,7 @@ Monorepo for an organogram application:
 - `backend/` — Rails 8.1 API-only, PostgreSQL, Devise + JWT, GraphQL (`graphql` gem), RSpec, rswag (Swagger).
 - `frontend/` — React 19 + TypeScript + Vite, Apollo Client, React Router, Vitest + Testing Library.
 - `docs/sdd/` — specifications (epics, user stories, Gherkin). Specs come before code.
+- `e2e/` — Playwright end-to-end tests (browser and API integration) run against the Docker stack.
 - `agents/` — role definitions for agents working on this repo.
 
 ## Non-negotiable rules
@@ -39,8 +40,8 @@ Monorepo for an organogram application:
 ```bash
 make setup          # first time: build images and prepare databases
 make up             # start the stack (API :3000, frontend :5173)
-make test           # RSpec + Vitest
-make test-e2e       # Playwright E2E suite (API + UI) against the stack
+make test           # RSpec + Vitest (unit and component)
+make test-e2e       # Playwright: UI and API integration tests against the running stack (starts it if needed)
 make lint           # RuboCop, Brakeman, ESLint, TypeScript
 make swagger        # regenerate Swagger after changing request specs in backend/spec/integration
 make graphql-schema # regenerate backend/schema.graphql

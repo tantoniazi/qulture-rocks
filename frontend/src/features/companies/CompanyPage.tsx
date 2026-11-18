@@ -23,7 +23,7 @@ export function CompanyPage() {
   const { companyId = "" } = useParams();
   const { data, loading, error } = useQuery<CompanyData>(COMPANY_QUERY, { variables: { id: companyId } });
   const [deleteEmployee, deleteState] = useMutation<DeleteEmployeeResult>(DELETE_EMPLOYEE_MUTATION, {
-    refetchQueries: [{ query: COMPANY_QUERY, variables: { id: companyId } }],
+    refetchQueries: ["Company"],
     awaitRefetchQueries: true,
   });
 

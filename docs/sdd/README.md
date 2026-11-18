@@ -10,7 +10,8 @@ acceptance criteria written in Gherkin, and only then receives code and tests.
 3. **Business rules** — invariants that must hold regardless of the interface (kept next to the epic).
 4. **Acceptance criteria** — Gherkin scenarios attached to the story. Each scenario maps to automated tests.
 5. **Implementation** — backend first (service layer + GraphQL), then frontend, always test-first.
-6. **Verification** — `make test` and `make lint` must be green before a story is closed.
+6. **Verification** — `make test`, `make test-e2e` and `make lint` must be green before a story is closed.
+   Acceptance criteria are covered by unit/integration specs and, for user-visible behaviour, by Playwright tests in `e2e/`.
 
 GitHub mirrors this structure: one issue per epic, one issue per user story, all
 attached to the "Qulture Organogram" project board.

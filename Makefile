@@ -78,13 +78,14 @@ lint-frontend: ## Lint and type-check the frontend
 
 # --- End-to-end -----------------------------------------------------------
 
-test-e2e: setup build ## Run the Playwright E2E suite against the stack (db, backend, frontend)
-	$(COMPOSE) up --abort-on-container-exit --exit-code-from e2e e2e
-
 # --- Everything -----------------------------------------------------------
 
-test: test-backend test-frontend ## Run all test suites
+test-e2e: ## Start the stack, wait until healthy, then run Playwright E2E and API integration tests
+	$(COMPOSE) up -d --wait backend frontend
+	$(COMPOSE) --profile e2e run --rm e2e
+
+test: test-backend test-frontend ## Run all unit and integration suites
 
 lint: lint-backend lint-frontend ## Run all linters
 
-.PHONY: help setup build up down restart logs ps backend-shell rails db-create db-migrate db-seed db-reset graphql-schema swagger test-backend lint-backend frontend-install test-frontend lint-frontend test lint test-e2e
+.PHONY: help setup build up down restart logs ps backend-shell rails db-create db-migrate db-seed db-reset graphql-schema swagger test-backend lint-backend frontend-install test-frontend test-e2e lint-frontend test lint

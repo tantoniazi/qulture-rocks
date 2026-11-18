@@ -1,4 +1,4 @@
-// Unique, readable test data so runs never collide with each other or with seeded data.
+// Unique, readable test data so repeated runs never collide with each other or with seeded data.
 let counter = 0;
 
 export function uniqueSuffix(): string {
@@ -8,11 +8,7 @@ export function uniqueSuffix(): string {
 
 export function newUser() {
   const suffix = uniqueSuffix();
-  return {
-    name: `Tester ${suffix}`,
-    email: `tester.${suffix}@example.com`,
-    password: "password123",
-  };
+  return { name: `Tester ${suffix}`, email: `tester.${suffix}@example.com`, password: "password123" };
 }
 
 export function newCompanyName(): string {

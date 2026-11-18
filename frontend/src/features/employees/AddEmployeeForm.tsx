@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@apollo/client/react";
-import { CREATE_EMPLOYEE_MUTATION, COMPANY_QUERY } from "../../graphql/documents";
+import { CREATE_EMPLOYEE_MUTATION } from "../../graphql/documents";
 import { ErrorList } from "../../components/ErrorList";
 import { FormField } from "../../components/FormField";
 
@@ -18,7 +18,7 @@ export function AddEmployeeForm({ companyId }: AddEmployeeFormProps) {
   const [picture, setPicture] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [createEmployee, { loading }] = useMutation<CreateEmployeeResult>(CREATE_EMPLOYEE_MUTATION, {
-    refetchQueries: [{ query: COMPANY_QUERY, variables: { id: companyId } }],
+    refetchQueries: ["Company"],
     awaitRefetchQueries: true,
   });
 

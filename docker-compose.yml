@@ -45,7 +45,7 @@ services:
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     environment:
       HOME: /tmp
-      VITE_API_URL: http://backend:3000
+      VITE_API_URL: http://localhost:3000
     volumes:
       - ./frontend:/app
     ports:
@@ -60,17 +60,21 @@ services:
       retries: 30
       start_period: 30s
 
+  # End-to-end and API integration tests (Playwright). Run with `make test-e2e` while the stack is up.
+  # Host networking lets the browser reach the API at localhost, the same way a developer does.
   e2e:
-    build: ./e2e
+    image: mcr.microsoft.com/playwright:v1.65.1-noble
+    profiles: ["e2e"]
+    network_mode: host
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /e2e
+    command: sh -c "npm install --no-audit --no-fund && npx playwright test"
     environment:
-      E2E_BASE_URL: http://frontend:5173
-      E2E_API_URL: http://backend:3000
-    depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-    networks: [qulture]
+      HOME: /tmp
+      E2E_BASE_URL: http://localhost:5173
+      E2E_API_URL: http://localhost:3000
+    volumes:
+      - ./e2e:/e2e
 
 volumes:
   pgdata:

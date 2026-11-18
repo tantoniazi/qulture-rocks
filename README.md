@@ -39,7 +39,7 @@ Run `make help` to list everything. The most used:
 | `make db-migrate` / `make db-seed` / `make db-reset` | Database operations |
 | `make test` | Run backend (RSpec) and frontend (Vitest) suites |
 | `make test-backend` / `make test-frontend` | Run one suite |
-| `make test-e2e` | Run the Playwright E2E suite (API + UI) against the stack |
+| `make test-e2e` | Start the stack and run the Playwright E2E and API integration tests |
 | `make lint` | RuboCop, Brakeman, ESLint and TypeScript checks |
 | `make swagger` | Regenerate `backend/swagger/v1/swagger.yaml` from the request specs |
 | `make graphql-schema` | Dump the GraphQL schema to `backend/schema.graphql` |
@@ -54,11 +54,10 @@ qulture-rocks/
 │   ├── app/graphql      Types, queries and mutations (thin: they call services)
 │   └── spec/            Model, service, request and integration (Swagger) specs
 ├── frontend/           React + TypeScript + Vite, Apollo Client, React Router, Vitest
-├── e2e/                Playwright end-to-end suite (API + UI) running in Docker
+├── e2e/                Playwright: browser (ui/) and API integration (api/) tests
 ├── docs/sdd/           Spec-driven development: epics, user stories, Gherkin criteria
 ├── agents/             Agent definitions used to work on this repository
 ├── docker-compose.yml  db, backend and frontend services
-├── e2e/Dockerfile      Playwright + Chromium container for the E2E suite
 └── Makefile            Single entry point for every workflow
 ```
 
@@ -114,12 +113,13 @@ mutation {
   endpoints and generate the Swagger document.
 - **Frontend:** Vitest with Testing Library covering validation, forms, auth screens and the
   organogram rendering logic.
-- **End-to-end:** Playwright (API + UI) in Docker, started with `make test-e2e`. Covers
-  authentication, companies, employees and the organogram, both through the REST/GraphQL API
-  and through the browser.
+- **End-to-end:** Playwright in `e2e/`, running in Docker against the real stack: browser tests (`e2e/tests/ui`)
+  for authentication, companies and the organogram, and HTTP integration tests (`e2e/tests/api`) for the
+  REST and GraphQL contracts. Run `make test-e2e`; it starts the stack and waits until it is healthy.
+  Tests create their own users and companies, so they can be repeated against the same database.
 
-Run `make test`. Specifications and the acceptance criteria they verify are in
-[`docs/sdd`](docs/sdd/README.md).
+Run `make test` for the unit and component suites. Specifications and the acceptance criteria they verify
+are in [`docs/sdd`](docs/sdd/README.md).
 
 ## Configuration
 
