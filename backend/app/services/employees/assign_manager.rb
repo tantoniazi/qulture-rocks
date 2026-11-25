@@ -24,9 +24,9 @@ module Employees
 
     def validation_error
       return nil if @manager.nil?
-      return "Manager must belong to the same company" if @manager.company_id != @employee.company_id
-      return "An employee cannot be their own manager" if @manager.id == @employee.id
-      return "Assignment would create a hierarchy loop" if creates_loop?
+      return I18n.t("business_errors.employee.manager_from_other_company") if @manager.company_id != @employee.company_id
+      return I18n.t("business_errors.employee.own_manager") if @manager.id == @employee.id
+      return I18n.t("business_errors.employee.hierarchy_loop") if creates_loop?
 
       nil
     end

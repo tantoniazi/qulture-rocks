@@ -6,13 +6,13 @@ module Auth
     end
 
     def call
-      return failure([ "Missing token" ]) if @token.blank?
+      return failure([ I18n.t("business_errors.auth.missing_token") ]) if @token.blank?
 
       payload = Warden::JWTAuth::TokenDecoder.new.call(@token)
       JwtDenylist.create!(jti: payload["jti"], exp: Time.zone.at(payload["exp"]))
       success
     rescue JWT::DecodeError
-      failure([ "Invalid token" ])
+      failure([ I18n.t("business_errors.auth.invalid_token") ])
     end
   end
 end

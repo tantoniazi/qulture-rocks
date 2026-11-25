@@ -11,7 +11,7 @@ module Mutations
 
     def resolve(company_id:, name:, email:, picture: nil)
       company = Company.find_by(id: company_id)
-      return { employee: nil, errors: [ "Company not found" ] } unless company
+      return { employee: nil, errors: [ I18n.t("business_errors.company.not_found") ] } unless company
 
       result = Employees::Create.call(company: company, name: name, email: email, picture: picture)
       { employee: result.record, errors: result.errors }

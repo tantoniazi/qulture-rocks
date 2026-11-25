@@ -50,5 +50,8 @@ module Backend
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
     config.host = nil
+
+    config.i18n.available_locales = [ :en, :"pt-BR" ]
+    config.i18n.default_locale = :en
   end
 end
